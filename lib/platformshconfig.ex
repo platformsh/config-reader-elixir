@@ -307,7 +307,7 @@ defmodule Platformsh do
             True if the environment is a production environment, False otherwise. It will also return False if not
             running on Platform.sh or in the build phase.
     """
-    def on_production() do
+    def on_production?() do
       if !is_valid_platform? and !in_build? do
         False
       else
