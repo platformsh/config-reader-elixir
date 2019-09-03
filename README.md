@@ -6,7 +6,7 @@ This library provides a streamlined and easy to use way to interact with a Platf
 ```
 alias Platformsh.Config, as: Config
 
-if Config.is_valid_platform? do
+if Config.is_valid_platform?() do
     IO.inspect Config.credentials("mysql")
 end
 ```

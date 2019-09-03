@@ -1,135 +1,5 @@
 defmodule Platformsh do
-  defmodule Get do
-    @doc """
-      Decodes a Platform.sh environment variable.
-            Args:
-                variable (string):
-                    Base64-encoded JSON (the content of an environment variable).
-            Returns:
-                An dict (if representing a JSON object), or a scalar type.
-            Raises:
-                JSON decoding error.
-    """
-    def decode(variable) do
-      if variable != nil do
-        Poison.decode!(Base.decode64!(variable))
-      else
-        nil
-      end
-    end
-
-    @doc """
-      get/1 Reads unprefixed environment variable, taking the prefix into account.
-        Args:
-           item (string):
-               The variable to read.
-    """
-    def value(item) do
-      directVariablesRuntime = %{
-        port: "PORT",
-        socket: "SOCKET"
-      }
-
-      System.get_env(directVariablesRuntime[item])
-    end
-
-    @doc """
-      get/2 Reads an environment variable, taking the prefix into account.
-        Args:
-           item (string):
-               The variable to read.
-    """
-    def value(item, env_prefix) do
-      directVariables = %{
-        project: "PROJECT",
-        app_dir: "APP_DIR",
-        application_name: 'APPLICATION_NAME',
-        tree_id: "TREE_ID",
-        project_entropy: "PROJECT_ENTROPY"
-      }
-
-      # Local index of the variables that can be accessed as direct properties
-      # (runtime only). The key is the property that will be read. The value is the environment variables, minus
-      # prefix, that contains the value to look up.
-
-      directVariablesRuntime = %{
-        branch: "BRANCH",
-        environment: "ENVIRONMENT",
-        document_root: "DOCUMENT_ROOT",
-        smtp_host: "SMTP_HOST"
-      }
-
-      inDirectVariablesRuntime = %{
-        routes: "ROUTES",
-        relationships: "RELATIONSHIPS",
-        application: "APPLICATION",
-        variables: "VARIABLES"
-      }
-
-      cond do
-        Map.has_key?(directVariables, item) ->
-          System.get_env("#{env_prefix}#{directVariables[item]}")
-
-        Map.has_key?(directVariablesRuntime, item) ->
-          System.get_env("#{env_prefix}#{directVariablesRuntime[item]}")
-
-        Map.has_key?(inDirectVariablesRuntime, item) ->
-          Platformsh.Get.decode(System.get_env("#{env_prefix}#{inDirectVariablesRuntime[item]}"))
-
-        True ->
-          False
-      end
-    end
-  end
-end
-
-defmodule Platformsh do
-  defmodule Environment do
-    alias Platformsh.Get, as: Get
-
-    @doc """
-    Local index of the variables that can be accessed as direct properties (build and
-    runtime). The key is the property that will be read. The value is the environment variables, minus prefix,
-    that contains the value to look up.
-    """
-
-    def environment() do
-      env_prefix = 'PLATFORM_'
-
-      %{
-        project: Get.value(:project, env_prefix),
-        appDir: Get.value(:app_dir, env_prefix),
-        applicationName: Get.value(:application_name, env_prefix),
-        treeID: Get.value(:tree_id, env_prefix),
-        projectEntropy: Get.value(:project_entropy, env_prefix),
-        mode: Get.value(:mode, env_prefix),
-
-        # Local index of the variables that can be accessed as direct properties
-        # (runtime only). The key is the property that will be read. The value
-        # is the environment variables, minus prefix, that contains the value to
-        # look up.
-        branch: Get.value(:branch, env_prefix),
-        environment: Get.value(:environment, env_prefix),
-        documentRoot: Get.value(:document_root, env_prefix),
-        smtpHost: Get.value(:smtp_host, env_prefix),
-
-        # Local index of variables available at runtime that have no prefix.
-        port: Get.value(:port),
-        socket: Get.value(:socket),
-
-        # Local index of variables available at runtime that need decoding
-        routes: Get.value(:routes, env_prefix),
-        relationships: Get.value(:relationships, env_prefix),
-        application: Get.value(:application, env_prefix),
-        variables: Get.value(:variables, env_prefix)
-      }
-    end
-  end
-end
-
-defmodule Platformsh do
-  alias Platformsh.Environment, as: Environment
-
+  alias Platformsh.Get, as: Get
   defmodule Config do
     @moduledoc """
     	Reads Platform.sh configuration from environment variables.
@@ -166,7 +36,43 @@ defmodule Platformsh do
     	. Platform.sh Environment Variables
     	        https://docs.platform.sh/development/variables.html
     """
+	
+    @doc """
+    Local index of the variables that can be accessed as direct properties (build and
+    runtime). The key is the property that will be read. The value is the environment variables, minus prefix,
+    that contains the value to look up.
+    """
+    def environment() do
+      env_prefix = 'PLATFORM_'
 
+      %{
+        # Local index of the variables that can be accessed at build-time
+        project: Get.value(:project, env_prefix),
+        app_dir: Get.value(:app_dir, env_prefix),
+        application_name: Get.value(:application_name, env_prefix),
+        tree_id: Get.value(:tree_id, env_prefix),
+        project_entropy: Get.value(:project_entropy, env_prefix),
+        mode: Get.value(:mode, env_prefix),
+
+        # Local index of the variables that can be accessed as direct properties
+        # (runtime only). 
+        branch: Get.value(:branch, env_prefix),
+        environment: Get.value(:environment, env_prefix),
+        document_root: Get.value(:document_root, env_prefix),
+        smtp_host: Get.value(:smtp_host, env_prefix),
+
+        # Local index of variables available at runtime that have no prefix.
+        port: Get.value(:port),
+        socket: Get.value(:socket),
+
+        # Local index of variables available at runtime that need decoding
+        routes: Get.value(:routes, env_prefix),
+        relationships: Get.value(:relationships, env_prefix),
+        application: Get.value(:application, env_prefix),
+        variables: Get.value(:variables, env_prefix)
+      }
+    end
+	
     @doc """
     Checks whether the code is running on a platform with valid environment variables.
     Returns:
@@ -174,7 +80,7 @@ defmodule Platformsh do
             True if configuration can be used, False otherwise.
     """
     def is_valid_platform?() do
-      Environment.environment()[:application_name] != nil
+      environment()[:application_name] != nil
     end
 
     @doc """
@@ -183,7 +89,7 @@ defmodule Platformsh do
         bool: True if running in build environment, False otherwise.
     """
     def in_build?() do
-      is_valid_platform? and Environment.environment()[:environment] != nil
+      is_valid_platform?() and environment()[:environment] == nil
     end
 
     @doc """
@@ -192,7 +98,7 @@ defmodule Platformsh do
         bool: True if in a runtime environment, False otherwise.
     """
     def in_runtime?() do
-      is_valid_platform? and !Environment.environment()[:environment] != nil
+      is_valid_platform?() and environment()[:environment]
     end
 
     @doc """
@@ -200,23 +106,26 @@ defmodule Platformsh do
     Args:
         relationship (string):
             The relationship name as defined in .platform.app.yaml
-        index (int):
-            The index within the relationship to access. This is always 0, but reserved for future extension.
+         for the moment it returns the first in the index of clustered services
     Returns:
         The credentials dict for the service pointed to by the relationship.
-    Raises:
-        RuntimeError:
-            Thrown if called in a context that has no relationships (eg, in build).
-        KeyError:
-            Thrown if the relationship/index pair requested does not exist.
     """
     def credentials(relationship) do
-      [config | _tail] = Environment.environment()[:relationships][relationship]
+      [config | _tail] = environment()[:relationships][relationship]
       config
     end
 
     @doc """
-    Returns a variable from the VARIABLES dict.
+    Retrieves the unfiltered credentials for accessing a relationship.
+    Returns:
+        The credentials dict for the service pointed to by the relationship.
+    """
+    def credentials() do
+      environment()[:relationships]
+    end
+
+    @doc """
+    variables/1 Returns a variable from the VARIABLES dict.
     Note:
         Variables prefixed with `env`: can be accessed as normal environment variables. This method will return
         such a variable by the name with the prefix still included. Generally it's better to access those variables
@@ -227,18 +136,18 @@ defmodule Platformsh do
         default (mixed):
             The default value to return if the variable is not defined. Defaults to nil.
     Returns:
-        The value of the variable, or the specified default. This may be a string or a dict.
+        The value of the variable, or  nil. This may be a string or a dict.
     """
-    def variable(name) do
-      if Map.has_key?(Environment.environment()[:variables], name) do
-        Environment.environment()[:variables][name]
+    def variables(name) do
+      if Map.has_key?(environment()[:variables], name) do
+        environment()[:variables][name]
       else
         nil
       end
     end
 
     @doc """
-    Returns the full variables dict.
+    variables/0 Returns the full variables dict.
     If you're looking for a specific variable, the variable() method is a more robust option.
     This method is for classes where you want to scan the whole variables list looking for a pattern.
     It's valid for there to be no variables defined at all, so there's no guard for missing values.
@@ -246,11 +155,11 @@ defmodule Platformsh do
         The full variables dict.
     """
     def variables() do
-      Environment.environment()[:variables]
+      environment()[:variables]
     end
 
     @doc """
-    Return the routes definition.
+    routes/0 Return the routes definition.
     Returns:
         The routes dict.
     Raises:
@@ -258,11 +167,11 @@ defmodule Platformsh do
             If the routes are not accessible due to being in the wrong environment.
     """
     def routes() do
-      Environment.environment()[:routes]
+      environment()[:routes]
     end
 
     @doc """
-    Get route definition by route ID.
+    routes/1  Get route definition by route ID.
     Args:
         route_id (string):
             The ID of the route to load.
@@ -272,8 +181,8 @@ defmodule Platformsh do
         KeyError:
             If there is no route by that ID, an exception is thrown.
     """
-    def get_route(route_id) do
-      Environment.environment()[:routes][route_id]
+    def routes(route_id) do
+      environment()[:routes][route_id]
     end
 
     @doc """
@@ -284,7 +193,7 @@ defmodule Platformsh do
         The application definition dict.
     """
     def application() do
-      Environment.environment()[:application]
+      environment()[:application]
     end
 
     @doc """
@@ -294,7 +203,7 @@ defmodule Platformsh do
             True on an Enterprise environment, False otherwise.
     """
     def on_enterprise?() do
-      is_valid_platform? and Environment.environment()[:mode] == 'enterprise'
+      is_valid_platform?() and environment()[:mode] == 'enterprise'
     end
 
     @doc """
@@ -308,12 +217,8 @@ defmodule Platformsh do
             running on Platform.sh or in the build phase.
     """
     def on_production?() do
-      if !is_valid_platform? and !in_build? do
-        False
-      else
-        prod_branch = if on_enterprise?, do: 'production', else: 'master'
-        Environment.environment()[:branch] == prod_branch
-      end
+	  prod_branch = if on_enterprise?(), do: "production", else: "master"
+      environment()[:branch] == prod_branch
     end
 
     @doc """
@@ -323,7 +228,7 @@ defmodule Platformsh do
             True if the relationship is defined, False otherwise.
     """
     def has_routes?() do
-      Environment.environment()[:routes] != nil
+      environment()[:routes] != nil
     end
 
     @doc """
@@ -333,7 +238,7 @@ defmodule Platformsh do
             True if the relationship is defined, False otherwise.
     """
     def has_relationships() do
-      Environment.environment()[:relationships] != nil
+      environment()[:relationships] != nil
     end
 
     @doc """
@@ -346,19 +251,104 @@ defmodule Platformsh do
             True if the relationship is defined, False otherwise.
     """
     def has_relationship(relationship) do
-      Map.has_key?(Environment.environment()[:relationships], relationship)
+      Map.has_key?(environment()[:relationships], relationship)
     end
-	
+
     @doc """
-    Returns the full variables dict.
-    If you're looking for a specific variable, the variable() method is a more robust option.
-    This method is for classes where you want to scan the whole variables list looking for a pattern.
-    It's valid for there to be no variables defined at all, so there's no guard for missing values.
+    Returns the just the names of relationships
     Returns:
-        The full variables dict.
+        a list with relationship names
     """
     def relationships() do
-      Map.keys(Environment.environment()[:relationships])
+      Map.keys(environment()[:relationships])
+    end
+  end
+end
+
+
+defmodule Platformsh do
+  defmodule Get do
+    @doc """
+      Decodes a Platform.sh environment variable.
+            Args:
+                variable (string):
+                    Base64-encoded JSON (the content of an environment variable).
+            Returns:
+                An dict (if representing a JSON object), or a scalar type.
+            Raises:
+                JSON decoding error.
+    """
+    def decode(variable) do
+      if variable != nil do
+        Poison.decode!(Base.decode64!(variable))
+      else
+        nil
+      end
+    end
+
+    @doc """
+      value/1 Reads unprefixed environment variable, taking the prefix into account.
+        Args:
+           item (string):
+               The variable to read.
+    """
+    def value(item) do
+      directVariablesRuntime = %{
+        port: "PORT",
+        socket: "SOCKET"
+      }
+
+      System.get_env(directVariablesRuntime[item])
+    end
+
+    @doc """
+      value/2 Reads an environment variable, taking the prefix into account.
+        Args:
+           item (string):
+               The variable to read.
+           prefix (string):
+               The Environment variable prefix
+    """
+    def value(item, env_prefix) do
+      # Local index of the variables that can be accessed as direct properties
+      # (runtime only). The key is the property that will be read. The value is the environment variables, minus
+      # prefix, that contains the value to look up.
+
+      directVariables = %{
+        project: "PROJECT",
+        app_dir: "APP_DIR",
+        application_name: 'APPLICATION_NAME',
+        tree_id: "TREE_ID",
+        project_entropy: "PROJECT_ENTROPY"
+      }
+
+      directVariablesRuntime = %{
+        branch: "BRANCH",
+        environment: "ENVIRONMENT",
+        document_root: "DOCUMENT_ROOT",
+        smtp_host: "SMTP_HOST"
+      }
+
+      inDirectVariablesRuntime = %{
+        routes: "ROUTES",
+        relationships: "RELATIONSHIPS",
+        application: "APPLICATION",
+        variables: "VARIABLES"
+      }
+
+      cond do
+        Map.has_key?(directVariables, item) ->
+          System.get_env("#{env_prefix}#{directVariables[item]}")
+
+        Map.has_key?(directVariablesRuntime, item) ->
+          System.get_env("#{env_prefix}#{directVariablesRuntime[item]}")
+
+        Map.has_key?(inDirectVariablesRuntime, item) ->
+          Platformsh.Get.decode(System.get_env("#{env_prefix}#{inDirectVariablesRuntime[item]}"))
+
+        True ->
+          nil
+      end
     end
   end
 end
