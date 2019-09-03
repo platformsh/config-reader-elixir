@@ -276,6 +276,11 @@ end
 
 defmodule Platformsh do
   defmodule Get do
+      @moduledoc """
+      	Reads Platform.sh helper functions
+      	See: https://docs.platform.sh/development/variables.html
+	  """
+
     @doc """
       Decodes a Platform.sh environment variable.
             Args:
