@@ -10,23 +10,23 @@ defmodule Platformsh do
     	    (The following properties are available at build time and run time.)
     	    project (string):
     	        The project ID.
-    	    applicationName (string):
+    	    application_name (string):
     	        The name of the application, as defined in its configuration.
-    	    treeID (string):
+    	    tree_id (string):
     	        An ID identifying the application tree before it was built: a unique hash is generated based on the contents
     	        of the application's files in the repository.
-    	    appDir (string):
+    	    app_dir (string):
     	        The absolute path to the application.
-    	    projectEntropy (string):
+    	    project_entropy (string):
     	        A random string generated for each project, useful for generating hash keys.
     	    (The following properties are only available at runtime.)
     	    branch (string):
     	        The Git branch name.
     	    environment (string):
     	        The environment ID (usually the Git branch plus a hash).
-    	    documentRoot (string):
+    	    document_root (string):
     	        The absolute path to the web root of the application.
-    	    smtpHost (string):
+    	    smtp_host (string):
     	        The hostname of the Platform.sh default SMTP server (an empty string if emails are disabled on the
     	        environment.
     	    port (string):
@@ -197,12 +197,12 @@ defmodule Platformsh do
     end
 
     @doc """
-    Determines if the current environment is a Platform.sh Enterprise environment.
+    Determines if the current environment is a Platform.sh Dedicated Enterprise environment.
     Returns:
         bool:
             True on an Enterprise environment, False otherwise.
     """
-    def on_enterprise?() do
+    def on_dedicated_enterprise?() do
       is_valid_platform?() and environment()[:mode] == 'enterprise'
     end
 
@@ -217,7 +217,7 @@ defmodule Platformsh do
             running on Platform.sh or in the build phase.
     """
     def on_production?() do
-	  prod_branch = if on_enterprise?(), do: "production", else: "master"
+	  prod_branch = if on_dedicated_enterprise?(), do: "production", else: "master"
       environment()[:branch] == prod_branch
     end
 
