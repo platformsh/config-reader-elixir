@@ -37,7 +37,6 @@ defmodule Platformshconfig.MixProject do
   
   defp package do
     [
-      organization: "platformsh",
 	  maintainers: [
 	        "Ori Pekelman",
 	      ],
