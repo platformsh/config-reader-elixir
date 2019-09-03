@@ -50,4 +50,22 @@ defmodule PlatformshConfigTest do
   test 'Has Mysql' do
     assert Map.has_key?(Config.credentials(), "mysqldb")
   end
+  
+  test 'DSN ecto formatter makes sense' do
+    assert Config.credentials("mysqldb") == %{
+              "cluster" => "vmwklzcpbi6zq-master",
+              "host" => "mysqldb.internal",
+              "ip" => "246.0.98.11",
+              "password" => "",
+              "path" => "main",
+              "port" => 3306,
+              "query" => %{"is_master" => true},
+              "rel" => "mysql",
+              "scheme" => "mysql",
+              "service" => "mysqldb",
+              "username" => "user"
+            }
+    assert  Config.ecto_dsn_formatter("mysqldb") == "ecto://user:@mysqldb.internal/main"
+  end
+ 
 end

@@ -262,6 +262,14 @@ defmodule Platformsh do
     def relationships() do
       Map.keys(environment()[:relationships])
     end
+	def ecto_dsn_formatter(relationship) do
+		creds = credentials(relationship)
+		username = creds["username"]
+		password = creds["password"]
+		host = creds["host"]
+		path = creds["path"]
+		"ecto://#{username}:#{password}@#{host}/#{path}"
+	end
   end
 end
 
