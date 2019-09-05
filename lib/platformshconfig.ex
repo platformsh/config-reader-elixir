@@ -1,6 +1,6 @@
 defmodule Platformsh do
   alias Platformsh.Get, as: Get
-   
+
   defmodule Config do
     @moduledoc """
     	Reads Platform.sh configuration from environment variables.
@@ -37,7 +37,7 @@ defmodule Platformsh do
     	. Platform.sh Environment Variables
     	        https://docs.platform.sh/development/variables.html
     """
-	
+
     @doc """
     Local index of the variables that can be accessed as direct properties (build and
     runtime). The key is the property that will be read. The value is the environment variables, minus prefix,
@@ -73,7 +73,7 @@ defmodule Platformsh do
         variables: Get.value(:variables, env_prefix)
       }
     end
-	
+
     @doc """
     Checks whether the code is running on a platform with valid environment variables.
     Returns:
@@ -218,7 +218,7 @@ defmodule Platformsh do
             running on Platform.sh or in the build phase.
     """
     def on_production?() do
-	  prod_branch = if on_dedicated_enterprise?(), do: "production", else: "master"
+      prod_branch = if on_dedicated_enterprise?(), do: "production", else: "master"
       environment()[:branch] == prod_branch
     end
 
@@ -263,43 +263,47 @@ defmodule Platformsh do
     def relationships() do
       Map.keys(environment()[:relationships])
     end
-	
+
     @doc """
     Formats a dsn for use with ecto
     Returns:
         a string in the format of a dsn url for ecto
     """
-	def ecto_dsn_formatter(config) do
-		username = config["username"]
-		password = config["password"]
-		host = config["host"]
-		path = config["path"]
-		"ecto://#{username}:#{password}@#{host}/#{path}"
-	end
-	
+    def ecto_dsn_formatter(config) do
+      username = config["username"]
+      password = config["password"]
+      host = config["host"]
+      path = config["path"]
+      "ecto://#{username}:#{password}@#{host}/#{path}"
+    end
+
     @doc """
     Guesses a relational database for ecto
     Returns:
         a string in the format of a dsn url for ecto or nil if none found, 
-	    this is guesss work so we don't want to crash on no value
+     this is guesss work so we don't want to crash on no value
     """
-	def guess_relational_database() do
-		if in_runtime?() do
-			cred = Enum.find(Platformsh.Config.credentials(), fn {_rel, cred} -> [config | _tail] = cred; String.contains?(config["scheme"], ["mysql", "pgsql"]) end)
-			[[config | _tailer] = _outer_list | _tail] = Tuple.to_list(Tuple.delete_at(cred,0))
-			Platformsh.Config.ecto_dsn_formatter(config)
-		end
-	end
+    def guess_relational_database() do
+      if in_runtime?() do
+        cred =
+          Enum.find(Platformsh.Config.credentials(), fn {_rel, cred} ->
+            [config | _tail] = cred
+            String.contains?(config["scheme"], ["mysql", "pgsql"])
+          end)
+
+        [[config | _tailer] = _outer_list | _tail] = Tuple.to_list(Tuple.delete_at(cred, 0))
+        Platformsh.Config.ecto_dsn_formatter(config)
+      end
+    end
   end
 end
 
-
 defmodule Platformsh do
   defmodule Get do
-      @moduledoc """
-      	Reads Platform.sh helper functions
-      	See: https://docs.platform.sh/development/variables.html
-	  """
+    @moduledoc """
+       	Reads Platform.sh helper functions
+       	See: https://docs.platform.sh/development/variables.html
+    """
 
     @doc """
       Decodes a Platform.sh environment variable.
@@ -386,14 +390,19 @@ defmodule Platformsh do
   end
 end
 
+@moduledoc """
+	Magically exports a guessed DATABASE url for ecto
+"""
 defmodule PlatformshConfigMagic do
-	@on_load :magic
-	
-	def magic() do
-		database_url = Platformsh.Config.guess_relational_database()
-		if System.get_env("DATABASE_URL") == nil && database_url do
-			System.put_env("DATABASE_URL", database_url)
-		end
-		:ok
-	end
+  @on_load :magic
+
+  def magic() do
+    database_url = Platformsh.Config.guess_relational_database()
+
+    if System.get_env("DATABASE_URL") == nil && database_url do
+      System.put_env("DATABASE_URL", database_url)
+    end
+
+    :ok
+  end
 end
