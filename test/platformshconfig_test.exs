@@ -1,7 +1,6 @@
 defmodule PlatformshConfigTest do
   use ExUnit.Case
-  alias Platformsh.Config, as: Config
-
+  
   setup do
 	# FIXME: figure out how to run this before all suites  
     env_vars = ["PLATFORM_APPLICATION","PLATFORM_APPLICATION_NAME", "PLATFORM_APP_COMMAND","PLATFORM_APP_COMMAND","PLATFORM_APP_DIR","PLATFORM_BRANCH","PLATFORM_DIR", "PLATFORM_DOCUMENT_ROOT","PLATFORM_PROJECT", "PLATFORM_PROJECT_ENTROPY", "PLATFORM_TREE_ID", "PLATFORM_VARIABLES", "PLATFORM_RELATIONSHIPS", "PLATFORM_ENVIRONMENT"]
@@ -40,19 +39,19 @@ defmodule PlatformshConfigTest do
   end
 
   test 'Valid Platform' do
-    assert Config.is_valid_platform?()
+    assert Platformsh.Config.is_valid_platform?()
   end
 
   test 'On Production' do
-    assert Config.on_production?()
+    assert Platformsh.Config.on_production?()
   end
 
   test 'Has Mysql' do
-    assert Map.has_key?(Config.credentials(), "mysqldb")
+    assert Map.has_key?(Platformsh.Config.credentials(), "mysqldb")
   end
   
   test 'DSN ecto formatter makes sense' do
-    assert Config.credentials("mysqldb") == %{
+    assert Platformsh.Config.credentials("mysqldb") == %{
               "cluster" => "vmwklzcpbi6zq-master",
               "host" => "mysqldb.internal",
               "ip" => "246.0.98.11",
@@ -65,7 +64,17 @@ defmodule PlatformshConfigTest do
               "service" => "mysqldb",
               "username" => "user"
             }
-    assert  Config.ecto_dsn_formatter("mysqldb") == "ecto://user:@mysqldb.internal/main"
+	cred = Platformsh.Config.credentials("mysqldb")
+    assert Platformsh.Config.ecto_dsn_formatter(cred) == "ecto://user:@mysqldb.internal/main"
   end
+  
+  test 'Guessing relational database' do
+    assert Platformsh.Config.guess_relational_database() == "ecto://user:@mysqldb.internal/main"
+  end
+
+  #We can't really test this without setting the environment _before_ we start the tests  
+  #test 'Magic env var guessing relational database' do
+  #  assert System.get_env("DATABASE_URL") == "ecto://main:main@database.internal/main"
+  #end
  
 end

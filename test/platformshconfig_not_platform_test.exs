@@ -1,6 +1,5 @@
 defmodule PlatformshConfigNotPlatformTest do
   use ExUnit.Case
-  alias Platformsh.Config, as: Config
 
   setup do
     # FIXME: figure out how to run this before all suites  
@@ -9,16 +8,16 @@ defmodule PlatformshConfigNotPlatformTest do
   end
 
   test 'Valid Platform' do
-    refute Config.is_valid_platform?()
+    refute Platformsh.Config.is_valid_platform?()
   end
 
   test 'On Production' do
-    refute Config.on_production?()
+    refute Platformsh.Config.on_production?()
   end
 
   test 'Does not have Mysql' do
 	  assert_raise BadMapError, fn ->
-		  Map.has_key?(Config.credentials(), "mysqldb")
+		  Map.has_key?(Platformsh.Config.credentials(), "mysqldb")
 	  end
   end
 end

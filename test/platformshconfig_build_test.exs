@@ -44,4 +44,8 @@ defmodule PlatformshConfigBuildTest do
 		  Map.has_key?(Platformsh.Config.credentials(), "mysqldb")
 	  end
   end
+ 
+  test 'Guessing relational database' do
+    refute Platformsh.Config.guess_relational_database() 
+  end
 end
