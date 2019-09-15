@@ -4,11 +4,11 @@ defmodule Platformshconfig.MixProject do
   def project do
     [
       app: :platformshconfig,
-	  name: "Platform.sh Config Reader",
-	  description: description(),
+      name: "Platform.sh Config Reader",
+      description: description(),
       source_url: "https://github.com/platformsh/config-reader-elixir",
       homepage_url: "https://platform.sh",
-      version: "0.1.1",
+      version: "0.1.2",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       package: package(),
@@ -21,31 +21,30 @@ defmodule Platformshconfig.MixProject do
       extra_applications: [:logger]
     ]
   end
-  
+
   defp description do
-     """
-     Platform.sh Config Reader
-     """
-   end
+    """
+    Platform.sh Config Reader
+    """
+  end
 
   defp deps do
     [
-	 {:poison, "~> 3.0"},
-	 {:ex_doc, ">= 0.0.0", only: :dev}
+      {:poison, "~> 3.0"},
+      {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
-  
+
   defp package do
     [
-	  maintainers: [
-	        "Ori Pekelman",
-	      ],
+      maintainers: [
+        "Ori Pekelman"
+      ],
       files: ["lib", "mix.exs", "LICENSE", "CHANGELOG.md", "README.md"],
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/platformsh/config-reader-elixir",
+        "GitHub" => "https://github.com/platformsh/config-reader-elixir"
       }
     ]
   end
-  
 end
