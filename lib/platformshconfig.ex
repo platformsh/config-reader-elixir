@@ -354,8 +354,8 @@ defmodule Platformsh.Config do
     password = config["password"]
     hostname = config["host"]
     path = config["path"]
-	port = config["port"]
-    "ecto://#{username}:#{password}@#{hostname}:{port}/#{path}"
+    port = config["port"]
+    "ecto://#{username}:#{password}@#{hostname}:#{port}/#{path}"
   end
 
   @doc """

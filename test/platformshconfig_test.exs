@@ -86,7 +86,7 @@ defmodule PlatformshConfigTest do
            }
 
     cred = Platformsh.Config.credentials("mysqldb")
-    assert Platformsh.Config.ecto_dsn_formatter(cred) == "ecto://user:@mysqldb.internal/main"
+    assert Platformsh.Config.ecto_dsn_formatter(cred) == "ecto://user:@mysqldb.internal:3306/main"
   end
 
   test 'Guessing relational database' do
