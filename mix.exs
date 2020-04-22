@@ -8,7 +8,7 @@ defmodule Platformshconfig.MixProject do
       description: description(),
       source_url: "https://github.com/platformsh/config-reader-elixir",
       homepage_url: "https://platform.sh",
-      version: "0.1.3",
+      version: "0.1.4",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       package: package(),
@@ -30,7 +30,7 @@ defmodule Platformshconfig.MixProject do
 
   defp deps do
     [
-      {:poison, "~> 3.0"},
+      {:poison, "~> 4.0"},
       {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
