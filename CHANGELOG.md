@@ -1,8 +1,12 @@
 # CHANGELOG
 
+## v0.1.6
+
+* Export URL in config provider
+
 ## v0.1.5
 
-* Add Config.Provider behviour and update deps
+* Add ConfigProvider behaviour and update deps
 
 ## v0.1.4
 

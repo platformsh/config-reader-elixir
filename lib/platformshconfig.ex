@@ -423,7 +423,7 @@ defmodule Platformsh.Config do
   """
   def config({:ecto, repo}) do
     conf = Platformsh.Config.guess_relational_database()
-
+    url = URI.parse(Platformsh.Config.primary_route())
     [
       "#{Mix.Project.config()[:app]}": [
         "#{repo}": [
@@ -431,9 +431,10 @@ defmodule Platformsh.Config do
           password: conf["password"],
           hostname: conf["host"],
           database: conf["path"],
-		  port: conf["port"]
+          port: conf["port"]
         ]
-      ]
+      ],
+      url: [host: url.host, path: url.path, scheme: url.scheme]
     ]
   end
 
