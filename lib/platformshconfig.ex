@@ -446,6 +446,7 @@ defmodule Platformsh.Config do
 end
 
 defmodule Platformsh.ConfigProvider do
+  @behaviour Config.Provider
   require Logger
 
   @moduledoc """

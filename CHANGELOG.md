@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.1.5
+
+* Add Config.Provider behviour and update deps
+
+## v0.1.4
+
+* Update deps and bump version
+
 ## v0.1.3
 
 * Add port so the lib works in tethered local mode

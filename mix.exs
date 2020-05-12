@@ -8,7 +8,7 @@ defmodule Platformshconfig.MixProject do
       description: description(),
       source_url: "https://github.com/platformsh/config-reader-elixir",
       homepage_url: "https://platform.sh",
-      version: "0.1.4",
+      version: "0.1.5",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
       package: package(),
